@@ -15,6 +15,7 @@
     "build:content": "node build-content.js",
     "check:content": "node check-content.js",
     "preview": "vite preview",
+    "deploy": "npm run build && wrangler deploy",
     "format": "prettier **/*.{html,js,json,svelte,md} --write"
   },
   "devDependencies": {
@@ -30,7 +31,8 @@
     "prettier-plugin-svelte": "^3.0.3",
     "shiki": "^4.5.0",
     "svelte": "^5.57.2",
-    "vite": "^8.3.3"
+    "vite": "^8.3.3",
+    "wrangler": "4.148.0"
   },
   "type": "module"
 }

@@ -13,22 +13,27 @@ npm run dev
 
 Run `npm run check:content` to compile the lesson examples, check annotation targets, and exercise the store, endpoint, hook, and session examples with mocked application helpers. Run `npm run build` to check that every lesson prerenders successfully.
 
-## Cloudflare Pages
+## Cloudflare Workers Static Assets
 
-The `sveltebyexample-com` project in the Spatie account is hosted at [sveltebyexample-com.pages.dev](https://sveltebyexample-com.pages.dev). It uses Direct Upload, so pushing to GitHub does not automatically deploy.
+The `sveltebyexample-com` Worker in the Spatie account serves the static site at [sveltebyexample-com.flareapp-io.workers.dev](https://sveltebyexample-com.flareapp-io.workers.dev). `wrangler.jsonc` points to the `public` build output. It has no Worker script or runtime bindings.
 
 Authenticate Wrangler for the Spatie account, or set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in your environment, then deploy:
 
 ```sh
 npm ci
-npm run build
-npx wrangler@4.148.0 pages deploy public --project-name sveltebyexample-com --branch main --force
+npm run deploy
 ```
 
-The `--force` flag keeps this Wrangler version on Pages instead of automatically converting the project to Workers. Cloudflare's built-in Git integration would require a new Pages project; Direct Upload can also be automated through your own CI.
+For automatic deployments, connect `spatie/sveltebyexample.com` in the Worker's **Settings → Builds** with these settings:
 
-Every page is prerendered to HTML with `adapter-static`. Cloudflare serves the generated files; no Node server, Pages Function, or Worker is needed at runtime. SvelteKit still handles client-side navigation, including the previous/next links and keyboard shortcuts. Direct links also work without JavaScript.
+- Production branch: `main`
+- Root directory: `/`
+- Build command: `npm run build`
+- Deploy command: `npx wrangler deploy`
+- Node version: `22.17.0` (also specified in `.node-version`)
+
+Keep `adapter-static`; do not let framework auto-configuration replace it with `adapter-cloudflare`. Every page is prerendered to HTML, and Cloudflare serves the generated files without running server-side application code. SvelteKit still handles client-side navigation, including the previous/next links and keyboard shortcuts. Direct links also work without JavaScript.
 
 Content updates require a new build. Request-time features such as authentication, database writes, or form actions would require a backend, such as a Cloudflare Worker with `adapter-cloudflare`. The server examples in the lessons are code samples, not endpoints used by this site.
 
-`static/_redirects` preserves links to renamed lessons. `static/404.html` gives unknown paths a real 404 instead of Cloudflare Pages' default SPA fallback.
+`static/_redirects` preserves links to renamed lessons. Wrangler's `404-page` handling serves `static/404.html` with a real 404 for unknown paths; this prerendered site does not need an SPA fallback.

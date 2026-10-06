@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sveltebyexample-com",
+  "compatibility_date": "2026-10-06",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./public",
+    "html_handling": "force-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
