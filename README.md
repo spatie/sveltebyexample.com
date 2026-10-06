@@ -15,7 +15,17 @@ Run `npm run check:content` to compile the lesson examples, check annotation tar
 
 ## Cloudflare Pages
 
-Use `npm run build` as the build command and `public` as the output directory. Set `NODE_VERSION` to `22.17.0` or a newer supported version in the Pages build environment.
+The `sveltebyexample-com` project in the Spatie account is hosted at [sveltebyexample-com.pages.dev](https://sveltebyexample-com.pages.dev). It uses Direct Upload, so pushing to GitHub does not automatically deploy.
+
+Authenticate Wrangler for the Spatie account, or set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in your environment, then deploy:
+
+```sh
+npm ci
+npm run build
+npx wrangler@4.148.0 pages deploy public --project-name sveltebyexample-com --branch main --force
+```
+
+The `--force` flag keeps this Wrangler version on Pages instead of automatically converting the project to Workers. Cloudflare's built-in Git integration would require a new Pages project; Direct Upload can also be automated through your own CI.
 
 Every page is prerendered to HTML with `adapter-static`. Cloudflare serves the generated files; no Node server, Pages Function, or Worker is needed at runtime. SvelteKit still handles client-side navigation, including the previous/next links and keyboard shortcuts. Direct links also work without JavaScript.
 
