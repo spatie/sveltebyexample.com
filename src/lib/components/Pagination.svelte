@@ -1,8 +1,7 @@
 <script>
-  export let nextPage;
-  export let previousPage;
+  let { nextPage, previousPage } = $props();
 
-  import { shortcut } from "$lib/shortcut";
+  import { shortcut } from "#lib/shortcut.js";
 </script>
 
 <nav>

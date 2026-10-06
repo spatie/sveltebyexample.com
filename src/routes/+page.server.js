@@ -1,4 +1,4 @@
-import content from "$lib/content.json";
+import content from "#lib/content.json";
 
 export function load() {
   return {

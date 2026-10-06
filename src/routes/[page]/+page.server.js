@@ -1,5 +1,9 @@
 import { error } from "@sveltejs/kit";
-import content from "$lib/content.json";
+import content from "#lib/content.json";
+
+export function entries() {
+  return content.map((page) => ({ page: page.slug }));
+}
 
 export function load({ params }) {
   const page = content.filter((page) => page.slug === params.page)[0];
@@ -9,7 +13,7 @@ export function load({ params }) {
   const previousPage = content[pageIndex - 1] ?? null;
 
   if (!page) {
-    throw error(404, { message: "Not found" });
+    error(404, "Not found");
   }
 
   return { page, nextPage, previousPage };

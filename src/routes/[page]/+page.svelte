@@ -4,7 +4,7 @@
   import Resources from "../../lib/components/Resources.svelte";
   import Pagination from "../../lib/components/Pagination.svelte";
 
-  export let data;
+  let { data } = $props();
 </script>
 
 <svelte:head>
@@ -23,12 +23,30 @@
   {/if}
 </Header>
 
-{#each data.page.examples as example}
-  <Example {example} />
-{/each}
+<div class="examples">
+  {#each data.page.examples as example}
+    <Example {example} />
+  {/each}
+</div>
 
 <Pagination nextPage={data.nextPage} previousPage={data.previousPage} />
 
 {#if data.page.resources}
   <Resources resources={data.page.resources} />
 {/if}
+
+<style>
+  @media (min-width: 640px) {
+    .examples {
+      display: grid;
+      grid-template-columns: calc((var(--content-width) - 1rem) / 2) minmax(
+          0,
+          max-content
+        );
+      column-gap: 1rem;
+      width: max-content;
+      min-width: 100%;
+      max-width: calc(50% + 50cqw - var(--spacing));
+    }
+  }
+</style>

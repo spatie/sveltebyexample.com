@@ -1,23 +1,18 @@
 import { marked } from "marked";
 import * as cheerio from "cheerio";
 import { promises as fs } from "fs";
-import { getHighlighter } from "shiki";
+import { createHighlighter } from "shiki";
 
 const THEME = "github-light";
 
-const shiki = await getHighlighter({
-  theme: THEME,
+const shiki = await createHighlighter({
+  themes: [THEME],
+  langs: ["svelte", "js", "ts", "html", "css", "json", "bash"],
 });
 
 function highlight(contents, lang) {
   return shiki.codeToHtml(contents, { lang, theme: THEME });
 }
-
-let existing = null;
-
-try {
-  existing = JSON.parse(await fs.readFile("./src/lib/content.json", "utf-8"));
-} catch (error) {}
 
 const content = (
   await Promise.all(
@@ -31,17 +26,10 @@ const content = (
           return null;
         }
 
-        const hash = Buffer.from(content).toString("base64").substring(-48);
-        const cached = existing?.find((page) => page.hash === hash);
-
-        if (cached) {
-          return cached;
-        }
-
         let [index, title] = filename.replace(".md", "").split(". ");
         index = parseInt(index);
 
-        const section = index > 24 ? "SvelteKit" : "Svelte";
+        const section = index >= 30 ? "SvelteKit" : "Svelte";
 
         const slug = title
           .toLowerCase()
@@ -71,9 +59,7 @@ const content = (
                 $pre.remove();
 
                 const $code = $pre.find("code");
-                const lang = $code
-                  .attr("class")
-                  .substring("languange-".length - 1);
+                const lang = $code.attr("class").replace("language-", "");
 
                 let filename = null;
                 let code = $pre.text();
@@ -94,7 +80,8 @@ const content = (
                 };
               });
 
-            // Add line number classes to paragraphs & strip metadata
+            // Place annotations on code-line grid rows and let the final row grow.
+            let lastLine = 0;
             $("p")
               .toArray()
               .forEach((p) => {
@@ -104,15 +91,16 @@ const content = (
                 if (match) {
                   const [textToStrip, line] = match;
 
-                  $p.html($p.html().replace(textToStrip, "")).addClass(
-                    `line-${line}`,
-                  );
+                  lastLine = Math.max(lastLine, Number(line));
+                  $p.html($p.html().replace(textToStrip, ""))
+                    .addClass(`line-${line}`)
+                    .attr("style", `--line: ${line}`);
                 }
               });
 
             const text = $("body").html().replace("\n\n", "\n");
 
-            return { title, text, code, isIntro, isResources };
+            return { title, text, code, lastLine, isIntro, isResources };
           })
           .filter((example) => example);
 
@@ -121,7 +109,6 @@ const content = (
         }
 
         const page = {
-          hash,
           title,
           section,
           slug,
@@ -150,4 +137,5 @@ const content = (
   )
 ).filter((page) => page);
 
-fs.writeFile("./src/lib/content.json", JSON.stringify(content, null, 2));
+await fs.writeFile("./src/lib/content.json", JSON.stringify(content, null, 2));
+shiki.dispose();

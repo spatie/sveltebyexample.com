@@ -1,8 +1,12 @@
+<script>
+  let { children } = $props();
+</script>
+
 <header>
   <a href="/">
     <img src="/svelte.svg" alt="Svelte logo" />
   </a>
-  <slot />
+  {@render children()}
 </header>
 
 <style>
